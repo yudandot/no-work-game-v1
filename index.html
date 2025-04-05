@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>不用上班的日子</title>
+    <style>
+        @keyframes gentle-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-2px, 2px) rotate(-1deg); }
+            50% { transform: translate(2px, -2px) rotate(1deg); }
+            75% { transform: translate(-2px, -2px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes gentle-melt {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes gentle-float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes gentle-click {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes comic-pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes comic-text {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes emoji-float {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+
+        @keyframes comic-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-5px, 5px) rotate(-2deg); }
+            50% { transform: translate(5px, -5px) rotate(2deg); }
+            75% { transform: translate(-5px, -5px) rotate(-2deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sound-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .sound-control:hover {
+            transform: scale(1.1);
+        }
+
+        .background-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-item {
+            position: absolute;
+            opacity: 0.4;
+            animation: gentle-float 8s infinite ease-in-out;
+            font-size: 24px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+        }
+
+        .container {
+            text-align: center;
+            padding: 3rem;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 550px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 2.5rem;
+            color: #2c3e50;
+            line-height: 1.4;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: comic-pop 0.5s ease-out;
+        }
+
+        .timer {
+            font-size: 2.2rem;
+            margin: 1.5rem 0;
+            color: #ff6b6b;
+            font-weight: bold;
+            animation: gentle-melt 2s infinite;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .clicks {
+            font-size: 1.4rem;
+            margin: 1.5rem 0;
+            color: #4a90e2;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .result {
+            font-size: 1.5rem;
+            margin: 2rem 0;
+            color: #2c3e50;
+            line-height: 1.8;
+            min-height: 100px;
+            white-space: pre-line;
+        }
+
+        .result-title {
+            font-size: 2.4rem;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: comic-shake 0.5s infinite;
+        }
+
+        .result-message {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            line-height: 1.8;
+            animation: comic-text 0.5s ease-out;
+        }
+
+        button {
+            padding: 1.3rem 2.8rem;
+            font-size: 1.4rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.8rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button.clicked {
+            animation: comic-pop 0.3s;
+        }
+
+        .emoji-effect {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            animation: emoji-float 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: comic-pop 0.5s ease-out;
+        }
+
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .warning {
+            animation: comic-shake 0.5s infinite;
+        }
+
+        .restart-btn {
+            background-color: #4a90e2;
+        }
+
+        .restart-btn:hover {
+            background-color: #357abd;
+        }
+
+        .success-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+            animation: pulse 3s infinite;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #f00;
+            animation: confetti-fall 4s linear infinite;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 2rem;
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .timer {
+                font-size: 2rem;
+            }
+
+            button {
+                padding: 1.1rem 2.4rem;
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sound-control" id="soundControl">🔊</div>
+    <div class="background-elements" id="backgroundElements"></div>
+    <div class="container">
+        <h1 id="vacationText">你还有1天假期</h1>
+        <div id="timer" class="timer hidden">10</div>
+        <div id="clicks" class="clicks hidden">点击次数：0</div>
+        <div id="result" class="result"></div>
+        <button id="extendButton">试着逆天改命吧</button>
+        <button id="restartButton" class="restart-btn hidden">再来！</button>
+    </div>
+
+    <script>
+        // 音效系统
+        class SoundSystem {
+            constructor() {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.isSoundEnabled = true;
+                this.masterGain = this.audioContext.createGain();
+                this.masterGain.connect(this.audioContext.destination);
+            }
+
+            playClickSound() {
+                if (!this.isSoundEnabled) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+                oscillator.stop(this.audioContext.currentTime + 0.1);
+            }
+
+            playCountdownSound() {
+                if (!this.isSoundEnabled) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+                oscillator.stop(this.audioContext.currentTime + 0.1);
+            }
+
+            playSuccessSound() {
+                if (!this.isSoundEnabled) return;
+                
+                const frequencies = [523.25, 659.25, 783.99];
+                const duration = 0.15;
+                
+                frequencies.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.masterGain);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime + index * duration);
+                    gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime + index * duration);
+                    
+                    oscillator.start(this.audioContext.currentTime + index * duration);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + (index + 1) * duration);
+                    oscillator.stop(this.audioContext.currentTime + (index + 1) * duration);
+                });
+            }
+
+            playFailureSound() {
+                if (!this.isSoundEnabled) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                
+                oscillator.start();
+                oscillator.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                oscillator.stop(this.audioContext.currentTime + 0.3);
+            }
+
+            toggleSound() {
+                this.isSoundEnabled = !this.isSoundEnabled;
+                const soundControl = document.getElementById('soundControl');
+                soundControl.textContent = this.isSoundEnabled ? '🔊' : '🔇';
+            }
+        }
+
+        // 游戏变量
+        let days = 1;
+        let clicks = 0;
+        let timeLeft = 10;
+        let timerInterval;
+        let isGameActive = false;
+
+        const vacationText = document.getElementById('vacationText');
+        const extendButton = document.getElementById('extendButton');
+        const restartButton = document.getElementById('restartButton');
+        const timerDisplay = document.getElementById('timer');
+        const clicksDisplay = document.getElementById('clicks');
+        const resultDisplay = document.getElementById('result');
+
+        // 创建音效系统实例
+        const soundSystem = new SoundSystem();
+
+        const failureMessages = [
+            "你剛想休息，結果被一所神秘學院召喚，必須連夜趕去報到。",
+            "一個戴眼鏡的小男孩緊急徵人，你被迫加入了一場搬磚大戰。",
+            "天氣預報錯亂，你明天要出差到「雲上城」送文件。",
+            "突然接到通知：必須參加「魔法基礎知識補考」。不及格要重修三年。",
+            "梁先生突然消失，留下一句話：「蛋炒飯，機場，速來！」",
+            "你剛想打開Netflix，結果被一群拿著長矛的人按住送去歷史再演習。",
+            "市中心召開了「次元裂縫修補義工大會」，你被點名參加。",
+            "突然收到匿名簡訊：「地心探險隊缺一個背鍋的，馬上出發。」",
+            "假條剛批，HR淡定補一句：「對了，假期期間請幫忙打理公司牧場。」",
+            "今天全公司請假，只有你必須值班守護傳說中的咖啡機。",
+            "你剛打開休假申請，老闆發來一條：「南極科考隊招人，感興趣嗎？」",
+            "天氣太好，城市管理局需要你扮成雲，漂浮8小時。",
+            "國際時空局緊急徵調：「未來有漏洞，需要一位臨時時空搬運工。」",
+            "城市出現神祕生物，生物保護協會分配給你一隻養，隨養隨打卡。",
+            "遇到熱氣球大賽志願者招募，你被拎走充當現場小裁判。",
+            "你的DNA被隨機選中，參加「世界上最無聊會議」試驗計畫。",
+            "本地馬戲團人手不足，你被安排去練習踩高蹺救急。",
+            "你剛要請假，一位穿風衣的神秘人丟給你一本厚厚的冒險指南。",
+            "你收到緊急指令：「今晚必須出席夢境安全維護會議。」",
+            "地下圖書館突然崩塌，管理員召集所有閒人搬書，你榜上有名。",
+            "「無限輪迴測試小組」發來邀請，你被錄取為第9999名試驗員。",
+            "明天早上，你要陪一位失戀詩人，在市中心高聲朗讀情詩12小時。",
+            "財政部突發新規：需要有人幫忙數十萬個硬幣，你中標了。",
+            "你剛遞交假條，一扇神秘之門打開，把你吸進了紙片世界。",
+            "星際快遞招聘，要求：「能扛、能跑、不問為什麼」，你已上崗。",
+            "異世界大會誤把你認成了主席代表，明天要發言。",
+            "你收到一隻會說話的鴿子留言：「快來，鴿子王國需要你！」",
+            "被某間神秘研究所選中，必須擔任24小時「夢境質檢員」。",
+            "你原本想躲起來，卻被誤抓參加了全宇宙拔河比賽。",
+            "剛想關掉手機，結果跳出提示：「您已報名成功：神秘打工盃大賽！」"
+        ];
+
+        function getRandomMessage() {
+            return failureMessages[Math.floor(Math.random() * failureMessages.length)];
+        }
+
+        function updateVacationText() {
+            if (isGameActive) {
+                vacationText.textContent = "为假期续命中";
+            }
+        }
+
+        function addEmojiEffect(x, y, emoji) {
+            const emojiElement = document.createElement('div');
+            emojiElement.className = 'emoji-effect';
+            emojiElement.textContent = emoji;
+            emojiElement.style.left = `${x}px`;
+            emojiElement.style.top = `${y}px`;
+            document.body.appendChild(emojiElement);
+            setTimeout(() => emojiElement.remove(), 1000);
+        }
+
+        function startGame() {
+            isGameActive = true;
+            clicks = 0;
+            timeLeft = 10;
+            extendButton.textContent = "点击我！";
+            extendButton.disabled = false;
+            timerDisplay.classList.remove('hidden');
+            clicksDisplay.classList.remove('hidden');
+            resultDisplay.textContent = "";
+            clicksDisplay.textContent = `点击次数：${clicks}`;
+            timerDisplay.textContent = timeLeft;
+            restartButton.classList.add('hidden');
+            updateVacationText();
+            soundSystem.playCountdownSound();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                soundSystem.playCountdownSound();
+
+                if (timeLeft <= 3) {
+                    extendButton.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            isGameActive = false;
+            extendButton.classList.add('hidden');
+            extendButton.classList.remove('warning');
+            timerDisplay.classList.add('hidden');
+            clicksDisplay.classList.add('hidden');
+            restartButton.classList.remove('hidden');
+            vacationText.classList.add('hidden');
+
+            if (clicks >= 100) {
+                days = 30;
+                resultDisplay.innerHTML = `
+                    <div class="speech-bubble">
+                        <div class="result-title">🎉 恭喜你，不上班之神！</div>
+                        <div class="result-message">你获得了30天假期</div>
+                    </div>`;
+                showSuccessEffect();
+                soundSystem.playSuccessSound();
+            } else {
+                resultDisplay.innerHTML = `
+                    <div class="speech-bubble">
+                        <div class="result-title">社畜你好，假期结束了</div>
+                        <div class="result-message">${getRandomMessage()}</div>
+                    </div>`;
+                soundSystem.playFailureSound();
+            }
+        }
+
+        function resetGame() {
+            days = 1;
+            clicks = 0;
+            timeLeft = 10;
+            isGameActive = false;
+            extendButton.disabled = false;
+            extendButton.textContent = "试着逆天改命吧";
+            extendButton.classList.remove('warning');
+            extendButton.classList.remove('hidden');
+            timerDisplay.classList.add('hidden');
+            clicksDisplay.classList.add('hidden');
+            resultDisplay.textContent = "";
+            restartButton.classList.add('hidden');
+            vacationText.classList.remove('hidden');
+            vacationText.textContent = "你还有1天假期";
+        }
+
+        function createBackgroundElements() {
+            const elements = ['📎', '📝', '☕', '💼', '📚', '⌚', '📱', '🎮'];
+            const container = document.getElementById('backgroundElements');
+            
+            for (let i = 0; i < 20; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-item';
+                element.textContent = elements[Math.floor(Math.random() * elements.length)];
+                
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const size = Math.random() * 20 + 20;
+                const delay = Math.random() * 5;
+                
+                element.style.left = `${x}%`;
+                element.style.top = `${y}%`;
+                element.style.fontSize = `${size}px`;
+                element.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(element);
+            }
+        }
+
+        function showSuccessEffect() {
+            const effect = document.createElement('div');
+            effect.className = 'success-effect';
+            document.body.appendChild(effect);
+
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                effect.appendChild(confetti);
+            }
+
+            setTimeout(() => effect.remove(), 3000);
+        }
+
+        extendButton.addEventListener('click', (event) => {
+            if (!isGameActive) {
+                startGame();
+            } else {
+                clicks++;
+                clicksDisplay.textContent = `点击次数：${clicks}`;
+                addEmojiEffect(event.clientX, event.clientY, '💪');
+                soundSystem.playClickSound();
+            }
+        });
+
+        restartButton.addEventListener('click', resetGame);
+
+        // 添加音效控制按钮事件
+        document.getElementById('soundControl').addEventListener('click', () => {
+            soundSystem.toggleSound();
+        });
+
+        // 初始化
+        createBackgroundElements();
+        extendButton.addEventListener('click', addClickEffect);
+        updateVacationText();
+    </script>
+</body>
+</html>
